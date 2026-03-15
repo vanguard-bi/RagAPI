@@ -62,9 +62,9 @@ async def lifespan(app: FastAPI):
     app.state.thread_pool.shutdown(wait=True)
     logger.info("Thread pool shutdown complete")
 
-    # Close vector store connections (MongoDB client / SQLAlchemy engine)
+    # Close vector store connections (MongoDB client)
     try:
-        close_vector_store_connections(vector_store)
+        close_vector_store_connections()
     except Exception as e:
         logger.warning("Failed to close vector store connections: %s", e)
 

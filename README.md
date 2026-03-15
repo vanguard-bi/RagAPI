@@ -320,6 +320,59 @@ pytest tests/test_batch_processing_integration.py::TestMemoryOptimization -v
 pytest tests/test_batch_processing_integration.py::TestSyncBatchedMemory -v
 ```
 
+##### End-to-End RAG Quality Benchmark
+
+This repository now includes a live benchmark test at `tests/e2e/test_rag_quality.py`.
+It uploads a small dataset, runs retrieval queries, and validates:
+
+- `Hit@k`
+- `MRR` (mean reciprocal rank)
+- Context evidence precision (expected snippet appears in retrieved chunk)
+
+This test is disabled by default and only runs when explicitly enabled.
+
+```bash
+# 1) Start the real API + vector DB (example)
+docker compose up
+
+# 2) In another shell, run the benchmark
+set RAG_EVAL_ENABLED=1
+set RAG_EVAL_BASE_URL=http://localhost:8000
+pytest tests/e2e/test_rag_quality.py -m integration -v
+```
+
+Optional environment variables:
+
+- `RAG_EVAL_DATASET` (default: `tests/e2e/rag_eval_dataset.json`)
+- `RAG_EVAL_K` (default: `5`)
+- `RAG_EVAL_MIN_HIT_RATE` (default: `0.90`)
+- `RAG_EVAL_MIN_MRR` (default: `0.70`)
+- `RAG_EVAL_MIN_CONTEXT_PRECISION` (default: `0.80`)
+- `RAG_EVAL_TIMEOUT_SECONDS` (default: `120`)
+- `RAG_EVAL_AUTH_TOKEN` (if API requires Bearer auth)
+- `RAG_EVAL_JWT_SECRET` and `RAG_EVAL_USER_ID` (test auto-generates JWT if secret provided)
+
+Dataset format:
+
+```json
+{
+  "documents": [
+    {
+      "id": "doc_id",
+      "filename": "doc.txt",
+      "content": "Document text to embed."
+    }
+  ],
+  "queries": [
+    {
+      "query": "Question text",
+      "expected_file_id": "doc_id",
+      "expected_snippets": ["optional expected phrase"]
+    }
+  ]
+}
+```
+
 #### Installing pre-commit formatter
 
 Run the following commands to install pre-commit formatter, which uses [black](https://github.com/psf/black) code formatter:

@@ -11,7 +11,19 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.services.vector_store.factory import get_vector_store
 
-load_dotenv(find_dotenv())
+# Prefer an explicit dotenv path for platforms like Cloud Run where secrets are mounted as files.
+# Fallback order:
+# 1) RAG_ENV_FILE env var
+# 2) /secrets/.env (Cloud Run secret file mount)
+# 3) normal .env discovery for local/dev
+RAG_ENV_FILE = os.getenv("RAG_ENV_FILE", "").strip()
+DEFAULT_SECRET_ENV_FILE = "/secrets/.env"
+if RAG_ENV_FILE:
+    load_dotenv(RAG_ENV_FILE)
+elif os.path.exists(DEFAULT_SECRET_ENV_FILE):
+    load_dotenv(DEFAULT_SECRET_ENV_FILE)
+else:
+    load_dotenv(find_dotenv())
 
 
 class VectorDBType(Enum):
@@ -42,7 +54,8 @@ def get_env_variable(
 
 
 RAG_HOST = os.getenv("RAG_HOST", "0.0.0.0")
-RAG_PORT = int(os.getenv("RAG_PORT", 8000))
+# Cloud Run sets PORT automatically; fallback to RAG_PORT for local/dev parity.
+RAG_PORT = int(os.getenv("RAG_PORT", os.getenv("PORT", 8000)))
 
 RAG_UPLOAD_DIR = get_env_variable("RAG_UPLOAD_DIR", "./uploads/")
 if not os.path.exists(RAG_UPLOAD_DIR):
@@ -316,7 +329,7 @@ elif EMBEDDINGS_PROVIDER == EmbeddingsProvider.GOOGLE_VERTEXAI:
 elif EMBEDDINGS_PROVIDER == EmbeddingsProvider.OLLAMA:
     EMBEDDINGS_MODEL = get_env_variable("EMBEDDINGS_MODEL", "nomic-embed-text")
 elif EMBEDDINGS_PROVIDER == EmbeddingsProvider.GOOGLE_GENAI:
-    EMBEDDINGS_MODEL = get_env_variable("EMBEDDINGS_MODEL", "gemini-embedding-001")
+    EMBEDDINGS_MODEL = get_env_variable("EMBEDDINGS_MODEL", "gemini-embedding-2-preview")
 elif EMBEDDINGS_PROVIDER == EmbeddingsProvider.BEDROCK:
     EMBEDDINGS_MODEL = get_env_variable(
         "EMBEDDINGS_MODEL", "amazon.titan-embed-text-v1"
@@ -349,7 +362,6 @@ elif VECTOR_DB_TYPE == VectorDBType.ATLAS_MONGO:
         connection_string=ATLAS_MONGO_DB_URI,
         embeddings=embeddings,
         collection_name=COLLECTION_NAME,
-        mode="atlas-mongo",
         search_index=ATLAS_SEARCH_INDEX,
     )
 else:

@@ -1,0 +1,13 @@
+services:
+  fastapi:
+    environment:
+      - RAG_PORT=8000
+      - RAG_HOST=0.0.0.0
+      - VECTOR_DB_TYPE=atlas-mongo
+      - ATLAS_MONGO_DB_URI=${ATLAS_MONGO_DB_URI}
+      - ATLAS_SEARCH_INDEX=${ATLAS_SEARCH_INDEX}
+      - COLLECTION_NAME=${COLLECTION_NAME}
+      - RAG_GOOGLE_API_KEY=${RAG_GOOGLE_API_KEY}
+      - EMBEDDINGS_PROVIDER=google_genai
+      - EMBEDDINGS_MODEL=gemini-embedding-2-preview
+    depends_on: []

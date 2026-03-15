@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   rag_api:
+    container_name: haki-rag
     build: .
     ports:
       - "8000:8000"
