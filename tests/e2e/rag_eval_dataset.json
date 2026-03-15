@@ -1,0 +1,51 @@
+{
+  "documents": [
+    {
+      "id": "apollo_11",
+      "filename": "apollo_11.txt",
+      "content": "Apollo 11 landed on the Moon on July 20, 1969. Neil Armstrong and Buzz Aldrin walked on the lunar surface while Michael Collins remained in lunar orbit."
+    },
+    {
+      "id": "python_release",
+      "filename": "python_release.txt",
+      "content": "Python was created by Guido van Rossum and first released in 1991. It emphasizes readability and uses significant indentation."
+    },
+    {
+      "id": "pgvector",
+      "filename": "pgvector.txt",
+      "content": "pgvector is a PostgreSQL extension that adds support for vector similarity search. It enables approximate nearest neighbor queries directly in Postgres."
+    }
+  ],
+  "queries": [
+    {
+      "query": "Who walked on the Moon during Apollo 11?",
+      "expected_file_id": "apollo_11",
+      "expected_snippets": ["Neil Armstrong", "Buzz Aldrin"]
+    },
+    {
+      "query": "When did Apollo 11 land on the Moon?",
+      "expected_file_id": "apollo_11",
+      "expected_snippets": ["July 20, 1969"]
+    },
+    {
+      "query": "Who created Python?",
+      "expected_file_id": "python_release",
+      "expected_snippets": ["Guido van Rossum"]
+    },
+    {
+      "query": "When was Python first released?",
+      "expected_file_id": "python_release",
+      "expected_snippets": ["1991"]
+    },
+    {
+      "query": "What does pgvector add to PostgreSQL?",
+      "expected_file_id": "pgvector",
+      "expected_snippets": ["vector similarity search"]
+    },
+    {
+      "query": "Where can approximate nearest neighbor queries run when using pgvector?",
+      "expected_file_id": "pgvector",
+      "expected_snippets": ["directly in Postgres"]
+    }
+  ]
+}

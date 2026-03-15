@@ -268,10 +268,11 @@ def init_embeddings(provider, model):
     elif provider == EmbeddingsProvider.GOOGLE_GENAI:
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-        return GoogleGenerativeAIEmbeddings(
-            model=model,
-            google_api_key=RAG_GOOGLE_API_KEY or None,
-        )
+        output_dimensionality = get_env_variable("EMBEDDINGS_DIMENSIONS", None)
+        kwargs = dict(model=model, google_api_key=RAG_GOOGLE_API_KEY or None)
+        if output_dimensionality:
+            kwargs["output_dimensionality"] = int(output_dimensionality)
+        return GoogleGenerativeAIEmbeddings(**kwargs)
     elif provider == EmbeddingsProvider.GOOGLE_VERTEXAI:
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
