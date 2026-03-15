@@ -14,31 +14,36 @@ param(
   [Parameter(Mandatory = $false)][string]$EmbeddingModel = "gemini-embedding-2-preview"
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 
-$image = "$Region-docker.pkg.dev/$ProjectId/$Repository/$ImageName:latest"
+$image = "$Region-docker.pkg.dev/$ProjectId/$Repository/${ImageName}:latest"
 
 Write-Host "Setting gcloud project..."
 gcloud config set project $ProjectId | Out-Null
 
 Write-Host "Ensuring Artifact Registry repository exists..."
-gcloud artifacts repositories describe $Repository `
+$null = gcloud artifacts repositories describe $Repository `
   --location=$Region `
-  --project=$ProjectId 2>$null
+  --project=$ProjectId 2>&1
 
 if ($LASTEXITCODE -ne 0) {
   gcloud artifacts repositories create $Repository `
     --repository-format=docker `
     --location=$Region `
     --description="Haki containers" `
-    --project=$ProjectId
+    --project=$ProjectId 2>&1
 }
 
 Write-Host "Building and pushing image with Cloud Build..."
 gcloud builds submit . `
   --config=cloudbuild.yaml `
-  --substitutions=_REGION=$Region,_REPO=$Repository,_IMAGE=$ImageName `
+  "--substitutions=_REGION=$Region,_REPO=$Repository,_IMAGE=$ImageName" `
   --project=$ProjectId
+
+if ($LASTEXITCODE -ne 0) {
+  Write-Error "Cloud Build failed. Aborting deployment."
+  exit 1
+}
 
 Write-Host "Deploying to Cloud Run..."
 $deployArgs = @(
@@ -58,10 +63,10 @@ if ($UseEnvFileSecret) {
   # Mount the full .env file from Secret Manager so python-dotenv can load it automatically.
   # Your secret value should be plain dotenv content (KEY=value per line).
   $deployArgs += "--set-env-vars=RAG_HOST=0.0.0.0,RAG_PORT=8000"
-  $deployArgs += "--update-secrets=/app/.env=$EnvFileSecret:latest"
+  $deployArgs += "--update-secrets=/secrets/.env=${EnvFileSecret}:latest"
 } else {
   $deployArgs += "--set-env-vars=VECTOR_DB_TYPE=atlas-mongo,COLLECTION_NAME=$CollectionName,ATLAS_SEARCH_INDEX=$AtlasSearchIndex,EMBEDDINGS_PROVIDER=$EmbeddingProvider,EMBEDDINGS_MODEL=$EmbeddingModel,RAG_HOST=0.0.0.0,RAG_PORT=8000"
-  $deployArgs += "--set-secrets=ATLAS_MONGO_DB_URI=$MongoUriSecret:latest,RAG_GOOGLE_API_KEY=$GoogleApiKeySecret:latest"
+  $deployArgs += "--set-secrets=ATLAS_MONGO_DB_URI=${MongoUriSecret}:latest,RAG_GOOGLE_API_KEY=${GoogleApiKeySecret}:latest"
 }
 
 $deployArgs += "--project=$ProjectId"
