@@ -10,21 +10,18 @@ from concurrent.futures import ThreadPoolExecutor
 from starlette.responses import JSONResponse
 
 from app.config import (
-    VectorDBType,
     debug_mode,
     RAG_HOST,
     RAG_PORT,
     CHUNK_SIZE,
     CHUNK_OVERLAP,
     PDF_EXTRACT_IMAGES,
-    VECTOR_DB_TYPE,
     LogMiddleware,
     logger,
     vector_store,
 )
 from app.middleware import security_middleware
-from app.routes import document_routes, pgvector_routes
-from app.services.database import PSQLDatabase, ensure_vector_indexes
+from app.routes import document_routes
 from app.services.vector_store.factory import close_vector_store_connections
 
 
@@ -42,20 +39,7 @@ async def lifespan(app: FastAPI):
         f"Initialized thread pool with {max_workers} workers (CPU cores: {os.cpu_count()})"
     )
 
-    if VECTOR_DB_TYPE == VectorDBType.PGVECTOR:
-        await PSQLDatabase.get_pool()  # Initialize the pool
-        await ensure_vector_indexes()
-
     yield
-
-    # Cleanup logic
-    if VECTOR_DB_TYPE == VectorDBType.PGVECTOR:
-        try:
-            logger.info("Closing asyncpg connection pool")
-            await PSQLDatabase.close_pool()
-            logger.info("asyncpg connection pool closed")
-        except Exception as e:
-            logger.warning("Failed to close asyncpg pool: %s", e)
 
     # Drain in-flight work before closing backing resources
     logger.info("Shutting down thread pool")
@@ -90,8 +74,6 @@ app.state.PDF_EXTRACT_IMAGES = PDF_EXTRACT_IMAGES
 
 # Include routers
 app.include_router(document_routes.router)
-if debug_mode:
-    app.include_router(router=pgvector_routes.router)
 
 
 @app.exception_handler(RequestValidationError)
