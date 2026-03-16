@@ -22,7 +22,7 @@
 GOOGLE_API_KEY  = "YOUR_GOOGLE_API_KEY"
 MONGO_URI       = "YOUR_ATLAS_MONGO_URI"   # include db name: .../haki?retryWrites=true
 MONGO_DB        = "YOUR_DB_NAME"
-COLLECTION_NAME = "legal_docs"             # same collection as cases
+COLLECTION_NAME = "haki_legal"             # same collection as cases
 
 # Paths on mounted Drive
 CSV_PATH  = "/content/drive/MyDrive/Haki/scraping_progress.csv"

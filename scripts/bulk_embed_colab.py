@@ -24,7 +24,7 @@
 GOOGLE_API_KEY  = "YOUR_GOOGLE_API_KEY"
 MONGO_URI       = "YOUR_ATLAS_MONGO_URI"   # include db name: .../haki?retryWrites=true
 MONGO_DB        = "YOUR_DB_NAME"           # e.g. "haki"
-COLLECTION_NAME = "legal_docs"
+COLLECTION_NAME = "haki_legal"
 
 # Google Drive CSV file ID (from share link)
 CSV_FILE_ID = "1gSGMJYqvIlbDm61yFdhBeRiWFOVAa-A5"
