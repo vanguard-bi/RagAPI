@@ -113,7 +113,7 @@ for f in md_files:
 print(f"  Matched      : {len(file_index):,}")
 print(f"  No CSV match : {unmatched}")
 
-# ── CELL 8: Clients ──────────────────────────────────────────
+# ── CELL 7: Clients ──────────────────────────────────────────
 
 embedder = GoogleGenerativeAIEmbeddings(
     model="gemini-embedding-2-preview",
@@ -134,7 +134,7 @@ splitter = RecursiveCharacterTextSplitter(
 
 print(f"\n✓ MongoDB connected → {MONGO_DB}.{COLLECTION_NAME}")
 
-# ── CELL 9: Checkpoint & error helpers ───────────────────────
+# ── CELL 8: Checkpoint & error helpers ───────────────────────
 
 def load_checkpoint() -> set[str]:
     if os.path.exists(CHECKPOINT_FILE):
@@ -156,7 +156,7 @@ def save_errors(errors: list):
     with open(ERRORS_FILE, "w") as f:
         json.dump(errors, f, indent=2)
 
-# ── CELL 10: Document builder ────────────────────────────────
+# ── CELL 9: Document builder ─────────────────────────────────
 
 def make_docs(case_id: str, text: str, meta: dict) -> list[dict]:
     chunks = splitter.split_text(text)
@@ -196,7 +196,7 @@ def make_docs(case_id: str, text: str, meta: dict) -> list[dict]:
         for i, chunk in enumerate(chunks)
     ]
 
-# ── CELL 11: Embedding with retry ────────────────────────────
+# ── CELL 10: Embedding with retry ────────────────────────────
 
 @retry(
     retry=retry_if_exception_type((
@@ -216,7 +216,7 @@ def embed_all(texts: list[str]) -> list[list[float]]:
         vecs.extend(_embed_sub_batch(texts[i : i + EMBED_BATCH]))
     return vecs
 
-# ── CELL 12: MongoDB insert (duplicate-safe) ─────────────────
+# ── CELL 11: MongoDB insert (duplicate-safe) ─────────────────
 
 def mongo_insert(docs: list[dict]):
     if not docs:
@@ -231,7 +231,7 @@ def mongo_insert(docs: list[dict]):
         if non_dup:
             raise RuntimeError(f"Unexpected write errors: {non_dup[:3]}") from bwe
 
-# ── CELL 13: Flush helper ────────────────────────────────────
+# ── CELL 12: Flush helper ────────────────────────────────────
 
 buf_docs:    list[dict] = []
 buf_texts:   list[str]  = []
@@ -253,7 +253,7 @@ def flush():
     save_checkpoint(done_ids)
     buf_docs, buf_texts, pending_ids = [], [], set()
 
-# ── CELL 14: Main ingestion loop ─────────────────────────────
+# ── CELL 13: Main ingestion loop ─────────────────────────────
 
 remaining = [
     (cid, fid)
