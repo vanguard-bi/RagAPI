@@ -162,22 +162,36 @@ def make_docs(case_id: str, text: str, meta: dict) -> list[dict]:
     chunks = splitter.split_text(text)
     return [
         {
-            "_id":           f"{case_id}_{i}",
-            "text":          chunk,
-            "file_id":       case_id,
-            "chunk_index":   i,
-            "title":         meta.get("title", ""),
-            "court":         meta.get("court", ""),
-            "court_code":    meta.get("param_court", ""),
-            "year":          meta.get("param_year", ""),
-            "judgment_date": meta.get("judgment_date", ""),
-            "case_number":   meta.get("case_number", ""),
-            "citation":      meta.get("citation", ""),
-            "judges":        meta.get("judges", ""),
-            "outcome":       meta.get("outcome", ""),
-            "url":           meta.get("url", ""),
-            "type":          meta.get("type", "Judgment"),
-            "language":      meta.get("language", "English"),
+            "_id":                      f"{case_id}_{i}",
+            "text":                     chunk,
+            "file_id":                  case_id,
+            "chunk_index":              i,
+            "doc_type":                 "case",
+            # Case identity
+            "title":                    meta.get("title", ""),
+            "case_number":              meta.get("case_number", ""),
+            "citation":                 meta.get("citation", ""),
+            "media_neutral_citation":   meta.get("media_neutral_citation", ""),
+            "type":                     meta.get("type", ""),          # Judgment or Ruling
+            "outcome":                  meta.get("outcome", ""),
+            "judgment_date":            meta.get("judgment_date", ""),
+            # Court
+            "court":                    meta.get("court", ""),
+            "court_code":               meta.get("param_court", ""),
+            "court_station":            meta.get("court_station", ""),
+            "court_url":                meta.get("court_url", ""),
+            "court_station_url":        meta.get("court_station_url", ""),
+            # Year / number within court
+            "year":                     meta.get("param_year", ""),
+            "case_num":                 meta.get("param_num", ""),
+            # People
+            "judges":                   meta.get("judges", ""),
+            "attorneys":                meta.get("attorneys", ""),
+            # Links
+            "url":                      meta.get("url", ""),
+            "pdf_url":                  meta.get("pdf_url", ""),
+            # Misc
+            "language":                 meta.get("language", "English"),
         }
         for i, chunk in enumerate(chunks)
     ]
